@@ -15,11 +15,15 @@
   0/0 === NaN
   1/0 === Infinity( typeof number)
   
+  
 * call & apply & bind
   
   func.call(obj, arg1, arg2, ...) 将obj设置为this，将参数以参数列表的形式传给func并调用
+  
   func.apply(obj, [args]) 将obj设置为this，将参数以数组的形式传递给func并调用
+  
   func.bind(obj, arg1, arg2, ...) 将this指向obj，并传入参数，会返回一个新的函数，可以在任何地方调用但是不丢失this
+  
   
   
 ## DOM & BOM
