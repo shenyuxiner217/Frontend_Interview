@@ -12,7 +12,7 @@
   Number.isNaN: determines whether the passed value is NaN and its type is Number, no implict conversion. 只有当值为number类型（NaN也是number类型）并且不是一个数字时，才会返回true。只要本身类型不是数字 || 是一个合法的数字，都会返回false。
   因为各种字符串都不是number type，因此都会返回false。
 
-  0/0 === NaN
+  Number.isNaN(0/0)
   1/0 === Infinity( typeof number)
   
   
