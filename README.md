@@ -1,4 +1,4 @@
-# Frontend_Interview
+# Frontend-Interview
 
 ## Javascript
 
@@ -73,8 +73,6 @@
   统一暴露：在js文件最后加上 export {variables, functions};
   默认暴露：export default，一个js文件里只能用一次
 
-* POST和GET的区别
-
 
 ## HTML && CSS
 
@@ -85,3 +83,9 @@
 
 * rem 移动端适配
   将html根元素字体大小设置为屏幕宽度，即1rem
+  
+## HTTP
+
+* POST和GET的区别
+
+* TCP vs UDP
