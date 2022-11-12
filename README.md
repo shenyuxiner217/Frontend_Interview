@@ -74,6 +74,7 @@
   默认暴露：export default，一个js文件里只能用一次
 
 
+
 ## HTML && CSS
 
 * 伪类与伪元素
@@ -84,8 +85,11 @@
 * rem 移动端适配
   将html根元素字体大小设置为屏幕宽度，即1rem
   
+
 ## HTTP
 
 * POST和GET的区别
 
 * TCP vs UDP
+
+* url输入 
