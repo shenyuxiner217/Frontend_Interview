@@ -25,6 +25,29 @@
   
   所有函数都有一个隐藏的[[Environment]]属性，该属性保存了对创建该函数位置的外部环境的引用，即可以记住并访问创建该函数位置外部的环境变量，与函数在哪里调用无关。
   
+  特点：
+  - 函数嵌套函数。
+  - 函数内部可以引用外部的参数和变量。
+  - 参数和变量不会被垃圾回收机制回收。
+  
+  优点：
+  1. 延长一些变量的生命周期，长期存在与内存中
+  2. 避免全局污染
+  3. 封装，私有成员的存在
+  4. 使外部也可以操作局部变量
+
+  应用：
+  1. 模拟块级作用域
+  2. 函数柯里化
+  3. 防抖和节流的应用
+
+  缺点：
+  1. 占用的内存没有及时释放，长期的积累会导致溢出
+  
+  解决办法：
+  1. 手动去释放内存，让内部函数的引用指向null
+  2. 尽量不使用闭包
+  
 * JS的继承
 
   包含哪几种继承方式：
@@ -50,9 +73,10 @@
   1. a instanceof Array
   2. a.constructor === Array
   
-  以上两种
+  以上两种方法的弊端：
+  用以上两种方式判断是否是array的时候，会忽略iframe元素
   
-  3. Array.isArray()
+  3. Array.isArray() // 兼容性问题
   4. Object.prototype.toString().call(a) === "[object Array]" （推荐）
   
   
@@ -169,6 +193,83 @@
   1. 可以通过jsperf等工具来跑benchmark，对比不同js代码片段的工作性能，进而优化js代码
 
 
+* 防抖
+  
+  当持续触发事件时，只有当一定时间内没有再继续出发事件，才会出发事件函数的执行
+
+  ```javascript
+  var inpur = document.getElementById("input")
+
+    function debounce(delay) {
+        let timer
+
+        return function(value) {
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                console.log(value)
+            }, delay)
+        }
+    }
+    
+    // 变量污染？ 
+    var debounceFunc = debounce(1000)
+    input.addEventListener("keyup", function(e) {
+        debounceFunc(e.target.value)
+        // 为何这里this不丢失，下面会丢失
+        // debounceFunc(this.value)
+    })
+  ```
+  
+  ```javascript
+  var inpur = document.getElementById("input")
+        
+  function debounce(callback) {
+      let timer = null
+
+      return function() {
+          clearTimeout(timer)
+          timer = setTimeout(() => {
+          // ？如何绑上的this
+              callback.apply(this)
+          }, 2000)
+      }
+  }
+
+  // ？无法传入e
+  // ？如何闭包，保存timer
+  input.addEventListener("keyup", debounce(function(){
+      console.log(this.value)
+  }))
+  ```
+  
+* 节流函数
+
+  当持续触发事件时，保证一段时间内，只触发一次事件
+  
+  ```javascript
+   var btn = document.getElementById("button")
+
+    function throttle(callback, wait) {
+        let timer = null;
+
+        return function() {
+            if (!timer) {
+                timer = setTimeout(() => {
+                    callback()
+                    // ？这里为什么不用clearTimeout
+                    timer = null
+                }, wait)
+            }
+        }
+    }
+
+    btn.onclick = throttle(() => console.log(1), 2000)
+  ```
+  
+* 图片懒加载
+
+  <img src="" data-src="xxx.img"/>
+
 
 ## 项目
 
@@ -180,8 +281,44 @@
 * 组件化
 
   1. 防止开发过程中合并代码时的冲突
-  2. 
 
+
+* 登陆验证
+
+  传统session方式：
+  1. 用户发送带有用户名和密码的post请求到服务器端
+  2. 服务器端验证用户信息，通过后将用户对象放在session中，session放入本地内存
+  3. 服务器生成一个带有sessionId的cookie，返回给浏览器
+  4. 浏览器再次发送请求时，会带上这个cookie
+  5. 服务器端收到请求后会检查sessionId，正确且没有过期则可以返回相应的用户信息给浏览器
+
+  问题：
+  1. Sessions: 每次用户认证通过以后，服务器需要创建一条记录保存用户信息，通常是在内存中，随着认证通过的用户越来越多，服务器的在这里的开销就会越来越大。
+  2. Scalability: 由于Session是在内存中的，这就带来一些扩展性的问题。
+  3. CORS: 当我们想要扩展我们的应用，让我们的数据被多个移动设备使用时，我们必须考虑跨资源共享问题。当使用AJAX调用从另一个域名下获取资源时，我们可能会遇到禁止请求的问题。
+  4. CSRF: 用户很容易受到CSRF攻击。
+  
+  
+  token方式：
+  1. 用户发送带有用户名和密码的post请求到服务器端
+  2. 服务器端验证通过后，生成token并将token作为key，用户信息作为value映射到redis缓存中
+  3. 服务器返回给浏览器一个带有token的cookie
+  4. 浏览器再次发送请求时，会带上这个token，服务器端接受到token后去redis中查询是否存在
+  
+  token方案保证了服务的无状态，所有的信息都是存在分布式缓存中，支持高并发
+  
+  JWT（JSON Web Token）方案：
+  JWT的结构：header.payload.signature(由header中的加密算法，并使用密钥对它们签名获得)
+  
+  1. 用户发送带有用户名和密码的post请求到服务器端
+  2. 服务器端验证通过后，将用户信息进行加密，生成JSON Web Token并返回
+  3. 浏览器再次发送请求时，都会带上这个JWT，通常会在请求时被拦截，放在Authorization header中
+  4. 服务器端验证签名，如果通过则返回请求结果
+
+  JWT方式将用户状态分散到了客户端中，可以明显减轻服务端的内存压力。完全无状态，可扩展。
+  由于没有Cookie被发送，还有助于防止CSRF攻击。
+  如果token是在授权头（Authorization header）中发送的，那么跨源资源共享(CORS)将不会成为问题，因为它不使用cookie。
+  该信息可以被验证和信任，因为它是数字签名的。
 
 
 
