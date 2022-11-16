@@ -135,8 +135,8 @@
   5. 内联块 inline-block
 
   解决问题
-  1. 清除
-  5. 内联块 inline-block
+  1. 清除外边距重叠
+  5. 水平布局
   
 
 ## HTTP
@@ -160,14 +160,38 @@
 * 缓存
   
   缓存分为浏览器缓存（localstorage和cookie）和HTTP缓存
+  
   HTTP缓存：分为强制缓存和协商缓存
     强制缓存：如果浏览器判断请求的目标资源有效命中强缓存，则无需与服务端做通讯直接从内存中读取资源
+            
             expires：在响应头该字段设置expires时间实现强缓存，但是expires过度依赖本地时间，因此已经被废弃
-            cache-control：在响应头设置cache-control实现强缓存，通过max-age来设置强制缓存的时长；no-cache是强制尽情协商缓存，no-store是禁止所有缓存策略
-    协商缓存：基于last-modified的协商缓存：需要在服务器端读出文件修改时间，并且把时间赋给响应头的last-modified字段，并设置cache-control:no-cache;
+            
+            cache-control：在响应头设置cache-control实现强缓存，通过max-age来设置强制缓存的时长；no-cache是禁止强制缓存，no-store是禁止所有缓存策略
+    
+    协商缓存：
+            
+            基于last-modified的协商缓存：需要在服务器端读出文件修改时间，并且把时间赋给响应头的last-modified字段，并设置cache-control:no-cache;
             当客户端读取到last-modified的时候，会在下次请求头中携带一个字段：if-modified-since: 从last-modified中读取的时间；服务器每次拿到资源后会对比时间看是否要返回新资源
+            
             基于etag的协商缓存：根据文件内容计算出唯一的哈希值，服务器会把它放在响应头的etag字段返回给用户，用户每次请求时将etag的值放入请求头的if-none-match中发送给服务器
             服务器进行对比，如果和目标资源的etag完全吻合则返回304和空的响应体，如果不吻合则返回新的文件和新的响应头中的etag给客户端
+            
+* http版本
+
+  http1.0：
+      1. 每次请求都打开一个新的tcp连接
+
+  http1.1：
+      1. 长连接，默认开启Connection： keep-alive，一次tcp连接可以发送多个http请求
+      2. 缓存处理增加了Etag，If-Unmodified-Since, If-Match, If-None-Match
+  
+  http2.0：
+      1. 多路复用，一个tcp连接中可以存在多个流的请求，每个流中都在传输带有序列标识的帧，因此可以同时发送请求并通过序列标识还原请求内容
+      2. 采用二进制传输，更加的方便且健壮，而1版本采用字符串传输
+      3. 支持服务端推送
+      4. 压缩了头部，并且在通讯双方各自缓存了一份头部field表，避免头部重复传输
+
+
              
 
 ## REACT
