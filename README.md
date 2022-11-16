@@ -37,9 +37,10 @@
   4. 使外部也可以操作局部变量
 
   应用：
-  1. 模拟块级作用域
-  2. 函数柯里化
-  3. 防抖和节流的应用
+  1. 回调函数
+  2. 自调用函数封装私有方法，可以创建单例模式
+  3. 函数柯里化
+  4. 防抖和节流的应用
 
   缺点：
   1. 占用的内存没有及时释放，长期的积累会导致溢出
@@ -122,6 +123,21 @@
 * rem 移动端适配
   将html根元素字体大小设置为屏幕宽度，即1rem
   
+* BFC 块级格式化上下文 (Block Formatting Context)
+
+  一个环境中的元素不会影响到其它环境中的布局，BFC就是一个作用范围，把它理解成是一个独立的容器，并且这个容器里box的布局与这个容器外的box毫不相干。
+  
+  触发条件：
+  1. 浮动元素
+  2. position为fixed或者absolute
+  3. overflow不是visible
+  4. 弹性盒
+  5. 内联块 inline-block
+
+  解决问题
+  1. 清除
+  5. 内联块 inline-block
+  
 
 ## HTTP
 
@@ -154,6 +170,125 @@
             服务器进行对比，如果和目标资源的etag完全吻合则返回304和空的响应体，如果不吻合则返回新的文件和新的响应头中的etag给客户端
              
 
+## REACT
+
+* React的理解
+
+  React 是一个网页 UI 框架，通过 组件化 的方式解决 视图层 开发 复用 的问题。它的核心设计思路有三点，分别是声明式、组件化与 通用性。
+  声明式：优势在于直观与组合
+  组件化：优势在于视图的拆分与模块复用，实现了高复用低耦合
+  通用性：在于一次学习，随处编写，比如 React Native，React 360 
+  
+* 虚拟DOM
+
+  通过JS对象来模拟DOM中的节点，减少对于真实DOM的操作，因为操作JS对象的性能会比操作真实DOM要高很多；当状态发生变更时，将变更前后的虚拟 DOM 树进行差异比较，这个过程称为 diff，diff算法能够大大提升渲染性能，而diff算法也是基于虚拟DOM的高效算法。生成的结果称为 patch，即需要更新的DOM。计算之后，会渲染 Patch 完成对真实 DOM 的操作。
+
+* Fiber
+
+  每当我们触发一次组件的更新，React 都会构建一棵新的虚拟 DOM 树，通过与上一次的虚拟 DOM 树进行 diff，这个过程是个递归的过程。同步渲染的递归调用栈是非常深的，只有最底层的调用返回了，整个渲染过程才会开始逐层返回。而一旦渲染占用了主线程，则完成之前用户无法进行任何操作。Fiber 会将一个大的更新任务拆解为许多个小任务。每当执行完一个小任务时，渲染线程都会把主线程交回去，看看有没有优先级更高的工作要处理。这就是所谓的异步渲染。
+  Fiber 架构的重要特征就是可以被打断的异步渲染模式。React 16 的生命周期被划分为了 reconciliation 和 commit 两个阶段，而 commit 阶段又被细分为了 pre-commit 和 commit。reconciliation 阶段在执行过程中允许被打断，而 commit 阶段则总是同步执行的。因为reconciliation阶段用户无法感知，而commit 阶段的操作则涉及真实 DOM 的渲染。
+  
+* React渲染页面的两个阶段
+  调度阶段（reconciliation）：在这个阶段 React 会更新数据生成新的 Virtual DOM，然后通过Diff算法，快速找出需要更新的元素，放到更新队列中去，得到新的更新队列。
+      更新 state 与 props；
+      调用生命周期钩子；
+      生成 virtual dom
+      这里应该称为 Fiber Tree 更为符合；
+      通过新旧 vdom 进行 diff 算法，获取 vdom change
+      确定是否需要重新渲染
+  渲染阶段（commit）：这个阶段 React 会遍历更新队列，将其所有的变更一次性更新到DOM上
+  
+* 函数式组件 vs 类式组件
+
+  类组件和函数组件之间的差异，是面向对象和函数式编程这两套不同的设计思想之间的差异。React 组件本身的定位就是函数，进数据、出UI的函数。作为开发者，我们编写的是声明式的代码。
+  性能优化上，类组件主要依靠 shouldComponentUpdate 阻断渲染来提升性能，而函数组件依靠 React.memo 缓存渲染结果来提升性能。
+  类组件在未来时间切片与并发模式中，由于生命周期带来的复杂度，并不易于优化。函数组件本身轻量简单，且在 Hooks 的基础上提供了比原先更细粒度的逻辑组织与复用。
+  
+
+* 高阶组件
+  
+  高阶组件（HOC，Higher-Order Components）不是组件，而是一个函数，它会接收一个组件作为参数并返回一个经过改造的新组件。实现方式有属性代理和反向继承。
+  属性代理：适用于强化props，条件渲染，组件懒加载
+  ```javascript
+  function hoc(Child) {
+      return class Parent extends React.Component {
+          state = {...}
+          render() {
+              return (<Child {...this.props} {...this.state}>) 
+          }
+      }
+  }
+  ```
+  反向继承：直接获取组件状态，绑定事件，劫持渲染，控制生命周期
+  ```javascript
+  function hoc(ComponentA) {
+      return class ComponentB extends ComponentA {
+      }
+  }
+  
+  ```
+  
+  用处：
+    - 抽取重复代码，实现组件复用，常见场景：页面复用。
+    - 条件渲染，控制组件的渲染逻辑（渲染劫持），常见场景：权限控制。
+    - 捕获被处理组件的生命周期，常见场景：组件渲染性能追踪、日志打点。
+
+  
+  优点：
+    1. 复用逻辑：高阶组件更像是一个加工react组件的工厂，批量对原有组件进行加工，包装处理。
+    2. 强化props：这个是HOC最常用的用法之一，高阶组件返回的组件，可以劫持上一层传过来的props,然后混入新的props,来增强组件的功能。代表作react-router中的withRouter。
+    3. 控制渲染：劫持渲染是hoc一个特性，在wrapComponent包装组件中，可以对原来的组件，进行条件渲染，节流渲染，懒加载等功能
+
+  
+
+
+* React组件渲染性能优化
+  React中某个组件变化时，需要遍历从root到叶子组件整个路径上的所有组件进行比较并调用render方法，只有对该组件内部才会做diff算法，尽管其他组件没有发生变化。
+  
+  1. 将变得部分和不变的部分分离，抽成单独的组件。
+  2. 类组件通过控制shouldComponentUpdate来控制，而函数式组件通过memo和useMemo
+  3. purecomponent
+
+* Memo vs useMemo
+
+  React.memo() 是一个高阶组件 (HOC)，它接收一个组件A作为参数并返回一个组件B，如果组件B的 props（或其中的值）没有改变，则组件 B 会阻止组件 A 重新渲染。
+  React.useMemo() 是一个hook，“创建”一个依赖函数，精细化控制是否需要重复执行某一段逻辑函数，当其中一个依赖项更改时， useMemo重新计算记忆的值，而不需要在每个渲染进行昂贵的计算。内部引用的每个值也应该出现在依赖项数组中。
+  
+  
+* useMemo vs useEffect
+
+  useMemo -> render -> useEffect
+  
+
+
+
+* Hooks
+
+  一系列以 “use” 作为开头的方法，它们提供了让你可以完全避开 class式写法，在函数式组件中完成生命周期、状态管理、逻辑复用等几乎全部组件开发工作的能力。
+  规范：
+    只在 React 函数组件中调用 Hook，而不在普通函数中调用 Hook。
+    只在最顶层使用 Hook，而不要在循环，条件或嵌套函数中调用 Hook。
+   
+   1. 分散在各种声明周期里的代码块，通过 Hooks 的方式将 相关的内容 聚合到一起，提升阅读性。
+   2. 比class组件更轻量级，更不容易出错，比如this的指向问题，降低代码bug量。
+   3. 自定义hook组件完成逻辑复用
+    
+    
+* 组件复用解藕
+
+  1. mixin：让不同的组件共用一些逻辑
+     缺点：mixin引入了隐式依赖关系，耦合性强
+  
+  2. render props 
+  
+  3. hoc
+  
+  3. hooks
+
+  4. 把组件拆分为容器组件和UI组件，将无状态的组件
+
+
+
 ## 性能优化
 
 * 如何减少重绘和重排
@@ -184,7 +319,7 @@
   
   1. css放在header中，js放在body最下方
   2. 对于外部引用的script标签，使用async或者defer来异步加载js文件
-  3. 路由懒加载
+  3. 路由组件懒加载
   4. 异步请求
 
 
@@ -273,10 +408,19 @@
 
 ## 项目
 
+* Arkie
+  
+  是一款企业级的作图系统，根据给定的素材和规范，利用图像算法智能生成大规模的广告图，解放设计师。这样的一个项目比较突出的特征是，作为一个有不同客户定制需求的工具，我们期望一套代码能够应用不同场景，因此代码及组件的复用及管理是非常重要的。第二点是由于我们的产品可以在线即时生成大规模的广告图片，因此前端渲染性能方面也是非常核心的。
+
 * 项目难点
 
-  1. TDD
+  1. 组件复用
   2. 图片数据量非常大，图片懒加载/优化
+
+* 如何组件复用
+
+  1. 使用Monorepo来存储管理组件库
+  2. 高阶组件
 
 * 组件化
 
@@ -322,5 +466,29 @@
 
 
 
+## Webpack
 
+* loader:
+  
+  css-loader：css-loader：将css资源编译成commonjs的模块到js中
+  style-loader：将js中引入的css文件通过创建style标签的形式打包到html文件来
+  image-loader：加载并且压缩图片文件，通过配置dataUrlCondition来分大小打包图片文件，小图片采用base64的方式注入到css中，可以节省http请求
+  postcss-loader：解决css兼容性问题
+  ts-loader：将ts文件转为js文件
+  babel-loader：把 ES6 转换成 ES5
+  
+
+* Plugin
+  
+  mini-css-extract-plugin: 之前的style-loader打包css文件是通过import进js文件然后加载js时生成style标签，容易发生闪屏现象，mini-css-extract-plugin可以将css文件单独打包，通过link引入html，解决该问题
+  eslint-plugin：通过配置各种rule来检查js语法以及统一代码风格，每个rule的级别value有off/0(关闭规则), warn/1(开启警告级别的规则), error/2
+  html-webpack-plugin：简化 HTML 文件创建，并让html文件自动引入打包资源
+  terser-webpack-plugin: 支持压缩 ES6 
+  
+  
+* loader vs plugin
+
+  Loader 本质就是一个函数，在该函数中对接收到的内容进行转换，返回转换后的结果。 因为 Webpack 只认识 JavaScript，所以loader需要对其他类型的资源进行转译的预处理工作。 在 module.rules 中配置，作为模块的解析规则，类型为数组。每一项都是一个 Object，包含了test，use等属性。
+  
+  Plugin 可以扩展 Webpack 的功能，在 Webpack 运行中会广播出许多事件，Plugin 可以监听这些事件，在合适的时机通过 Webpack 提供的 API 改变输出结果。在 plugins 中单独配置，类型为数组，每一项是一个 Plugin 的实例，参数都通过构造函数传入。
 
