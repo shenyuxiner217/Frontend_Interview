@@ -66,6 +66,14 @@
   
   func.bind(obj, arg1, arg2, ...) 将this指向obj，并传入参数，会返回一个新的函数，可以在任何地方调用但是不丢失this
   
+  call/apply实际场景：
+  原型链和构造函数的继承
+  把伪数组改写成数组：[...arguments] / Array.prototype.slice.call(arguments)
+  js的数据类型：Object.prototyoe.toString.call(obj)
+  改变this的指向
+  
+  手写call：
+    
   
   
 * 判断是数组还是对象
@@ -78,7 +86,7 @@
   用以上两种方式判断是否是array的时候，会忽略iframe元素
   
   3. Array.isArray() // 兼容性问题
-  4. Object.prototype.toString().call(a) === "[object Array]" （推荐）
+  4. Object.prototype.toString.call(a) === "[object Array]" （推荐）
   
   
   
@@ -191,6 +199,16 @@
       3. 支持服务端推送
       4. 压缩了头部，并且在通讯双方各自缓存了一份头部field表，避免头部重复传输
 
+
+* XSS攻击
+
+  页面恶意注入：
+  通过script标签注入恶意代码片段，浏览器无法识别会进行解析。
+  解决方案是在请求发出到达服务器前加一个拦截器，在其中对特殊字符进行转移。
+  
+  通过a标签的href改写为以javascript开头的字符串，导致浏览器在进行页面跳转时解析恶意注入的代码片段。
+  解决方案是开启白名单，只有https和http的请求才可以发生跳转
+  
 
              
 
