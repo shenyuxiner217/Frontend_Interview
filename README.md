@@ -234,11 +234,18 @@
   调度阶段（reconciliation）：在这个阶段 React 会更新数据生成新的 Virtual DOM，然后通过Diff算法，快速找出需要更新的元素，放到更新队列中去，得到新的更新队列。
       更新 state 与 props；
       调用生命周期钩子；
-      生成 virtual dom
-      这里应该称为 Fiber Tree 更为符合；
+      生成 virtual dom，这里应该称为 Fiber Tree 更为符合；
       通过新旧 vdom 进行 diff 算法，获取 vdom change
       确定是否需要重新渲染
   渲染阶段（commit）：这个阶段 React 会遍历更新队列，将其所有的变更一次性更新到DOM上
+  
+* Fiber & Hook
+  Fiber数据结构：vdom 树会被转成 fiber 链表，然后再渲染 fiber。Fiber数据结构中，FiberNode上有 memoizedState 和 updateQueue 属性，函数组件会将内部用到的所有的 hook 通过单向链表的形式，保存在组件对应 fiber 节点的 memoizedState 属性上。updateQueue 是 useEffect 产生的 effect 连接成的环状单向链表。
+  Hook数据结构：hook 的 memoizedState 存的是当前 hook 自己的值。baseQueue记录由于之前某些高优先级任务导致更新中断，尚未处理的最后一个 update。每个 useXxx 的 hooks 都有 mountXxx 和 updateXxx 两个阶段。链表只创建一次，在 mountXxx 当中，后面都是 update。在mount阶段，调用mountWorkInProgressHook 通用方法，所有 hook 都会执行，通过它新建 hook 对象，如果前面没有hook 对象，就将该 hook 挂到当前 fiber 节点的 memoizedState上面，否则接到前一个 hook 对象的 next 上，构成单向链表。
+  
+* 为什么不能在循环、条件等嵌套中调用hook
+
+  各个 hook 在 mount 时会以链表的形式挂到 fiber.memoizedState上。在update时获取hook对象需要遍历列表，通过顺序索引到当前需要的hook对象，如果打乱了顺序或者进行嵌套则会无法正确更新。
   
 * 函数式组件 vs 类式组件
 
@@ -328,6 +335,49 @@
   3. hooks
 
   4. 把组件拆分为容器组件和UI组件，将无状态的组件
+
+
+* 组件隐藏不卸载
+
+  1. 用div包裹组件，将css设置为display:none
+  2. Portal 提供了一种将子节点渲染到存在于父组件以外的 DOM 节点的方式，先通过 document.createElement 在内存中创建一个元素，然后再通过 React.createPoral 把 React 子节点渲染到这个元素上，这样就实现了“空渲染”。
+
+  ```javascript
+    const targetElement = document.createElement('div')
+    ReactDOM.createPortal(child, targetElement)
+  ```
+  我们可以进一步封装出一个 Conditional 组件，从而实现通用性的条件渲染逻辑：
+  
+  ```javascript
+    export const Conditional = props => {
+    const [targetElement] = useState(() => document.createElement('div'))
+    const containerRef = useRef()
+    useLayoutEffect(() => {
+      if (props.active) {
+        containerRef.current.appendChild(targetElement)
+      } else {
+        try {
+          containerRef.current.removeChild(targetElement)
+        } catch (e) {}
+      }
+    }, [props.active])
+    return (
+      <>
+        <div ref={containerRef} />
+        {ReactDOM.createPortal(props.children, targetElement)}
+      </>
+    )
+  }
+  ```
+  
+  首先，我们创建了一个 targetElement ，并且通过 createPortal 将 children 渲染到 targetElement 。然后，我们会创建一个容器 div 元素，并且通过 containerRef 拿到它的引用。最后，当 active 为 true 时，我们会把 targetElement 手动添加到 containerRef.current 的内部，反之，则会从其内部移除掉 targetElement 。实际使用的方式如下：
+  
+  ```javascript
+    <Conditional active={!shouldHide}>
+      <Foo/>
+    </Conditional>
+  ```
+  
 
 
 
