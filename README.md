@@ -378,6 +378,22 @@
     </Conditional>
   ```
   
+  
+* React18 新特性
+
+  - 为了更好的管理root节点，React 18 引入了一个新的 root API，同时，在卸载组件时，我们也需要将 unmountComponentAtNode 升级为 root.unmount：
+    ```javascript
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+    
+    const root = document.getElementById('root')!;
+    ReactDOM.createRoot(root).render(<App />);
+    ```
+  - 批处理：批处理是指为了获得更好的性能，在数据层，将多个状态更新批量处理，合并成一次更新（在视图层，将多个渲染合并成一次渲染）
+    在React 18 之前，我们只在 React 事件处理函数 中进行批处理更新。在 18 之后，任何情况都会自动执行批处理，多次更新始终合并为一次。
+    
+  - 在 React 18 的 Suspense 组件中，官方对 空的fallback 属性的处理方式做了改变：不再跳过 缺失值 或 值为null 的 fallback 的 Suspense 边界。相反，会捕获边界并且向外层查找，如果查找不到，将会把 fallback 呈现为 null。
 
 
 
@@ -495,7 +511,9 @@
   
 * 图片懒加载
 
+```javascript
   <img src="" data-src="xxx.img"/>
+```
 
 
 ## 项目
@@ -564,7 +582,7 @@
   
   css-loader：css-loader：将css资源编译成commonjs的模块到js中
   style-loader：将js中引入的css文件通过创建style标签的形式打包到html文件来
-  image-loader：加载并且压缩图片文件，通过配置dataUrlCondition来分大小打包图片文件，小图片采用base64的方式注入到css中，可以节省http请求
+  asset-module：加载并且压缩图片文件，通过配置dataUrlCondition来分大小打包图片文件，小图片采用base64的方式注入到css中，可以节省http请求
   postcss-loader：解决css兼容性问题
   ts-loader：将ts文件转为js文件
   babel-loader：把 ES6 转换成 ES5
@@ -583,4 +601,181 @@
   Loader 本质就是一个函数，在该函数中对接收到的内容进行转换，返回转换后的结果。 因为 Webpack 只认识 JavaScript，所以loader需要对其他类型的资源进行转译的预处理工作。 在 module.rules 中配置，作为模块的解析规则，类型为数组。每一项都是一个 Object，包含了test，use等属性。
   
   Plugin 可以扩展 Webpack 的功能，在 Webpack 运行中会广播出许多事件，Plugin 可以监听这些事件，在合适的时机通过 Webpack 提供的 API 改变输出结果。在 plugins 中单独配置，类型为数组，每一项是一个 Plugin 的实例，参数都通过构造函数传入。
+  
+  
+* 减少build时间
 
+  1. thread-loader：多进程打包，使用：将其放在比较耗时的loader前，比如babel-loader
+  2. cache-loader：缓存打包资源，提高二次构建的速度，使用：将其放在比较耗时的loader前
+  3. HotModuleReplacementPlugin：在开发过程中开启热更新，如果有修改文件，只刷新该模块，其他保持不变
+    ```javascript
+    //使用webpack提供的热更新插件
+     plugins: [
+        new webpack.HotModuleReplacementPlugin()
+     ],
+    //最后需要在我们的devserver中配置
+    devServer: {
+      hot: true
+    },
+    ```
+    
+  4. exclude和include：合理设置 需要处理的文件 和 不需要处理的文件 这两个属性
+    ```javascrip
+    //使用exclude排除指定文件夹
+        exclude: /node_modules/,
+    ```
+    
+  5. 构建区分环境：在配置时需要明确区分哪些配置用于开发环境，哪些配置用于生产环境
+      开发环境：希望减少构建时间，去除代码压缩、gzip、体积分析等优化的配置，大大提高构建速度
+      生产环境：希望减小最终项目的打包体积需要代码压缩、gzip、体积分析等优化的配置，大大降低最终项目打包体积
+  
+  
+* 减少打包体积
+    （代码的压缩比较耗时间，所以只用在打包项目时，所以只需要在webpack.prod.js中配置）
+   - css-minimizer-webpack-plugin 压缩、去重css文件
+   - terser-webpack-plugin 压缩js代码
+
+   ```javascript
+   optimization: {
+      minimizer: [
+          new CssMinimizerPlugin(),
+          new TerserPlugin({
+              terserOptions: {
+                  compress: {
+                      drop_console: true // 去除console
+                  }
+              }
+          })
+      ]
+   }
+   ```
+   - tree-shaking：只打包用到的代码，没用到的不打包，webpack5在production模式下默认开启
+  
+* source-map
+  方便在报错的时候定位到错误的文件位置
+  开发环境：我们需要精准的错误定位
+  ```javascript
+  devServer: {
+    ...
+  },
+  mode: development,
+  devtool: 'eval-cheap-module-source-map',
+  ```
+  
+  生产环境：希望错误定位但不想打包体积大
+  ```javascript
+  mode: production,
+  devtool: 'nosources-source-map'
+  ```
+  
+* 提升用户体验
+  （只需要在生产环境中配置）
+  1. 如果不进行模块懒加载则整个项目都会被打包进一个js文件里，体积很大，网页请求的时候，首屏加载会时间很长 
+
+    ```javascript
+    const routes = [
+      {
+        path: '/login',
+        name: 'login',
+        component: login
+      },
+      {
+        path: '/home',
+        name: 'home',
+        // 懒加载
+        component: () => import('../views/home/home.vue'),
+      },
+    ]
+    ```
+    
+  2. Gzip：开启Gzip后，大大提高用户的页面加载速度，因为gzip的体积比原文件小很多，需要服务器 nginx 配合，使用compression-webpack-plugin
+    ```javascript
+    plugins: [
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        threshold: 10240,
+        minRatio: 0.8
+      })
+    ]
+    ```
+    
+  3. asset-module：对于小图片转为base64，减少发送http请求的次数
+  ```javascript
+    {
+        test: /\.(png|jpe?g|gif|svg|webp)$/,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 25 * 1024, // 25kb
+          }
+        },
+        generator: {
+          filename: 'image/[contenthash][ext][query]'
+        }
+    }
+  ```
+  
+  4. 减少打包体积的如：css-minimizer-webpack-plugin、terser-webpack-plugin、tree-shaking
+  5. 合理配置hash：保证改过的文件要改变hash值，而没改过的文件保持原来的hash，更好命中缓存
+    ```javascript
+    output: {
+      path: path.resolve(__dirname, '../dist'),
+      // 给js文件加上 contenthash
+      filename: 'js/chunk-[contenthash].js',
+      clean: true,
+    },
+    ```
+  6. splitChunks：拆包
+    ```javascript
+        optimization: {
+            splitChunks: {
+                cacheGroups: {
+                    vendor: {
+                        name: 'vendor',
+                        test: /[\\/]node_modules[\\/]/,
+                        minSize: 0,
+                        minChunks: 1,
+                        priority: 10,
+                        chunks: 'initial'
+                    },
+                    common: {
+                        name: 'common',
+                        test: /[\\/]src[\\/]/,
+                        chunks: 'all',
+                        minSize: 0,
+                        minChunks: 2
+                    }
+                }
+            }
+        },
+    ```
+    
+      
+## AntD
+  
+1. 如何设置主题：
+
+  ```javascript
+    import { ConfigProvider, Button } from 'antd';
+
+    const App: React.FC = () => (
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#00b96b',
+          },
+        }}
+      >
+        <Button />
+      </ConfigProvider>
+    );
+  ```
+  
+  
+  
+  
+  
+  
+  
+  
+  
