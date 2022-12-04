@@ -330,7 +330,7 @@
   
   2. render props 
   
-  3. hoc
+  3. hoc 
   
   3. hooks
 
