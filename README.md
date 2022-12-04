@@ -155,35 +155,30 @@
 
 * url输入后发生了什么
 
-  1. 解析域名：先查看本地是否有该域名对应的IP地址，有的话则直接发送请求，没有的话则会发送一个DNS请求到DNS服务器，服务器会把域名和对应的IP地址返回给用户。
-  2. 哪都对应的IP地址后，浏览器会以一个随机的端口向服务器的web程序发起TCP连接请求，这个请求通过各种路由到达服务器端后，再由TCP/IP协议栈层层解包到达web程序。
-  3. 通过三次握手后，客户端与服务器端建立起了TCP连接，发起一个HTTP请求，一个请求报文辉包含请求行、请求头、请求体。
-  4. 服务器端收到请求后返回HTTP响应报文，也包含了响应行、响应头、响应体。
-  5. 浏览器得到请求返回的HTML文档时，浏览器的渲染引擎开始工作，主线程会自上而下解析html文件，通过html构建dom树、通过css文件构建render树、通过计算去布局render树、绘制render树。
-  6. 在解析过程中遇到请求外部资源时，过程是异步的不会影响html文档加载。而加载过程中遇到js文件，html文档的渲染会被挂起，因为js可能会修改dom。因此我们常常把js放在文档最后。
-  7. 当遇到外部静态资源时，浏览器会再次发送请求，并且可以对这些资源进行缓存。
-  8. 一个完整的html页面就渲染完成了。
+
 
 
 * 缓存
   
-  缓存分为浏览器缓存（localstorage和cookie）和HTTP缓存
+  缓存分为浏览器缓存（localStorage、sessionStorage、cookie、IndexDB、WebSql）和HTTP缓存
   
   HTTP缓存：分为强制缓存和协商缓存
     强制缓存：如果浏览器判断请求的目标资源有效命中强缓存，则无需与服务端做通讯直接从内存中读取资源
-            
-            expires：在响应头该字段设置expires时间实现强缓存，但是expires过度依赖本地时间，因此已经被废弃
-            
-            cache-control：在响应头设置cache-control实现强缓存，通过max-age来设置强制缓存的时长；no-cache是禁止强制缓存，no-store是禁止所有缓存策略
+    - expires：在响应头该字段设置expires时间实现强缓存，但是expires过度依赖本地时间，因此已经被废弃
+    - cache-control：在响应头设置cache-control实现强缓存，通过max-age来设置强制缓存的时长；no-cache是禁止强制缓存，no-store是禁止所有缓存策略
     
     协商缓存：
+    - 基于last-modified的协商缓存：需要在服务器端读出文件修改时间，并且把时间赋给响应头的last-modified字段，并设置cache-control:no-cache;
+      当客户端读取到last-modified的时候，会在下次请求头中携带一个字段：if-modified-since: 从last-modified中读取的时间；服务器每次拿到资源后会对比时间看是否要返回新资源
+    - 基于etag的协商缓存：根据文件内容通过md5算法计算出唯一的哈希值，服务器会把它放在响应头的etag字段返回给用户，用户每次请求时将etag的值放入请求头的if-none-match中发送给服务器
+      服务器进行对比，如果和目标资源的etag完全吻合则返回304和空的响应体，如果不吻合则返回新的文件和新的响应头中的etag给客户端
+    
+    * Etag高于Last-modified
+
+* 关闭缓存的写法：Cache-Control: no-cache, no-store, must-revalidate;
+* 使用缓存的写法：Cache-Control: max-age=100000；想更新的时候更改文件url
             
-            基于last-modified的协商缓存：需要在服务器端读出文件修改时间，并且把时间赋给响应头的last-modified字段，并设置cache-control:no-cache;
-            当客户端读取到last-modified的时候，会在下次请求头中携带一个字段：if-modified-since: 从last-modified中读取的时间；服务器每次拿到资源后会对比时间看是否要返回新资源
-            
-            基于etag的协商缓存：根据文件内容计算出唯一的哈希值，服务器会把它放在响应头的etag字段返回给用户，用户每次请求时将etag的值放入请求头的if-none-match中发送给服务器
-            服务器进行对比，如果和目标资源的etag完全吻合则返回304和空的响应体，如果不吻合则返回新的文件和新的响应头中的etag给客户端
-            
+
 * http版本
 
   http1.0：
