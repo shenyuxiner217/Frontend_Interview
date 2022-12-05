@@ -177,9 +177,73 @@
 
   解决问题
   1. 清除外边距重叠
-  5. 水平布局
+  2. 水平布局
+  3. 浮动元素父元素高度塌陷
   
   
+* 外边距重叠
+
+  两个块级元素的上外边距和下外边距可能会合并。
+  
+  兄弟元素：底部的元素设置BFC（display: inline-block、float: left、postion: absolute/fixed）
+  父子元素：子元素设置BFC，父元素设置border: 1px solid transparent，父元素设置overflow: hidden/auto
+  
+
+
+
+* 清除浮动
+
+  - 给父元素设置高度
+  - 父元素设置overflow: hidden/auto
+  - 使用伪元素
+    ::after{
+      content: "";
+      display: table; 
+      clear: both;
+    }
+  - 在最后一个浮动元素后面加一个空的元素，并设置clear:both
+ 
+
+
+
+* CSS预处理器的优点：
+
+  - 通过代码嵌套来反映css属性之间的层级关系，便于阅读和书写
+  - 支持定义css变量：$name
+  - 允许继承样式@extend
+  - 允许使用@mixin和@include对样式进行复用
+  - 可以计算样式，支持循环语句等
+  - 可以将css文件模块化，实现复用
+
+
+* 水平垂直居中
+
+  - 绝对定位 + tansform：
+    .parent {
+        position: relative;
+    }
+
+    .child {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%,-50%);
+    }
+  - flex布局
+    .parent {
+      display: flex;
+      justify-content:center;
+      align-items:center;
+  }
+
+* 垂直居中
+  - line-height: height
+
+
+* 水平居中
+  - margin: 0 auto;
+    height: 100px;
+
 
 ## HTTP
 
