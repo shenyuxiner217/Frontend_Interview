@@ -13,7 +13,7 @@
   因为各种字符串都不是number type，因此都会返回false。
 
   Number.isNaN(0/0)
-  1/0 === Infinity( typeof number)
+  1/0 === Infinity(typeof number)
   
   
 * prototype对象和原型链
@@ -122,6 +122,39 @@
 
 
 ## HTML && CSS
+
+* H5新特性
+
+  - 语义化标签
+  - video和audio标签，以及为了浏览器兼容性用于加载资源的source标签
+  - canvus画布，可以用于在网页上创建画布，用js绘图
+  - 增强型表单：input新类型属性，可以更好地控制输入和验证，如date、time、email、range；新表单元素progress、meter等；新表单属性：pattern、required、min/max、mutiple
+  - navigator里新增Geolocation对象可以通过getCurrentPostion()方法来获取用户位置
+  - draggable拖放特性
+  - web worker：通过加载一个脚本文件，创建一个独立的js线程，通过postMessage和onMessage来交换数据
+  - 新增本地存储方式：localStorage、sessionStorage
+  - Web Socket实现了服务器端和客户端的全双工通信
+
+
+* CSS3新特性
+
+  - 新增圆角：border-radius
+  - 新增元素阴影：box-shadow
+  - 文字阴影特效：text-shadow
+  - 新增颜色表示方式：rgba和hsla，a为透明度
+  - 新增一些背景属性：backgroud-clip、border-origin
+  - 新增transition属性，过渡效果：
+    transition-property: width; 
+    transition-duration: 1s;
+    transition-timing-function: linear;
+    transition-delay: 2s;
+    
+  - 新增transform属性，允许旋转、缩放、平移元素
+  - 新增animation动画属性、做预设动画
+  - 新增颜色渐变linear-gradient(direction, color-stop1, color-stop2,...)
+  - 新增flex布局和grid布局
+
+
 
 * 伪类与伪元素
   
