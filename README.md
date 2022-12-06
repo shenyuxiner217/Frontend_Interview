@@ -313,11 +313,11 @@
 * CDN提供服务的过程
 
   - 用户输入url后，经过DNS服务器的解析，发现对应的是一个CDN专用的DNS服务器，于是将域名解析权交给CDN专用的DNS服务器；
-  - 该CDN专用DNS服务器将一个CDN的全局负载均衡设备IP地址返回给用户
-  - 用户向CDN全局负载均衡设备发起数据请求
-  - CDN全局负载均衡设备根据用户的IP地址及用户请求的内容URL，选择一台用户所在区域的CDN区域负载均衡设备
-  - CDN区域负载均衡设备选择一台合适的缓存服务器，将该缓存服务器的ip地址返回给全局负载均衡设备，全局负载均衡设备将ip地址返回给用户
-  - 
+  - 该CDN专用DNS服务器将一个CDN的全局负载均衡设备IP地址返回给用户；
+  - 用户向CDN全局负载均衡设备发起数据请求；
+  - CDN全局负载均衡设备根据用户的IP地址及用户请求的内容URL，选择一台用户所在区域的CDN区域负载均衡设备；
+  - CDN区域负载均衡设备选择一台合适的缓存服务器，将该缓存服务器的ip地址返回给全局负载均衡设备，全局负载均衡设备将ip地址返回给用户；
+  - 用户向该缓存服务器发起请求，缓存服务器将缓存内容发送给用户。
              
 
 ## REACT
@@ -509,26 +509,30 @@
 
 * 如何减少重绘和重排
   
-  1. 尽量不要用js操作dom树，比如可以采用虚拟dom，先在内存中更改，然后一次性更改完后append上去，只需要一次重排重绘
-  2. 外部引用css和内联样式块，放在header里，确保样式先被下载和解析，否则会导致页面大量重排
-  3. 减少不必要的DOM层级，因为当你改变某个层级中的元素时，会导致它从根元素到最内层子元素都会改变
-  4. 不要通过改变父元素的样式来改变元素的样式
-  5. 有动画效果的元素尽量让它脱离文本流，这样修改元素的css可以避免重排
-  6. img标签设置宽高比面重排
-  7. 使用transform来做形变和位移不会导致重排
+  1. 尽量减少用js操作dom树，比如可以采用虚拟dom，先在内存中更改，然后一次性更改完后append上去；或者创建文档片段documentFragment（没有父对象的最小文档对象），在上面应用DOM操作，最后再append到真实DOM上，因为documentFragment不是真实的DOM树，因此不会触发重新渲染，只需要一次重排重绘
+  2. 尽量减少用js直接操作style，相比而言可以更改类名来更改样式
+  3. 外部引用css和内联样式块，放在header里，确保样式先被下载和解析，否则会导致页面大量重排
+  4. 减少不必要的DOM层级，因为当你改变某个层级中的元素时，会导致它从根元素到最内层子元素都会改变
+  5. 不要通过改变父元素的样式来改变元素的样式，尽可能在低层级DOM上改变样式
+  6. 有动画效果的元素尽量让它脱离文本流，减少对其他元素的影响，比如用absolute定位
+  7. 或者使用transform来做形变和位移及动画效果不会导致重排，因为重绘重排在主线程上发生，而transform是直接通过合成线程画出位图，将位图发送给GPU进行绘制，不会触发重绘重排
+  8. img标签设置宽高避免重排
+  9. 不要使用table布局，因为很小的改动会造成整个table的重新布局，或者设置table-layout:auto;或者是table-layout:fixed
+  10. 因为浏览器本身会将所有重排重绘操作放入一个队列，当到达一定数量或者一定时间后浏览器对队列进行批处理，因此可以将多个读操作和多个写操作放在一起，就可以将多次重排合并为一次
 
 
 * 加快HTTP请求
 
   1. 使用webpack等打包工具压缩优化外部资源
-  2. 优化图片：采用sprites设计风格，把多张背景图片合成一个文件，对于不同的图片采用正确的格式进行压缩，只需要发送一次请求
-  3. 内联图片，采用base64对图片进行编码，将较小的图片变成dataurl嵌入到样式表中，可以缓存到本地减少请求的大小和次数
-  4. 将图片裁剪至合适的大小，而不是直接在页面上进行大小的压缩 
-  5. 避免空的src或者href，虽然不会影响加载时间，但任然会给服务器发送请求，增加服务器压力
-  6. 因为dns请求会占据请求中很大一部分的事件，因此对于页面上的其他外链资源可以给其设置dns-prefetch进行dns预解析
-  7. ajax异步请求，尽量使用get而不是post，因为post会发送两次请求，并且get可以利用缓存
-  8. 对于cookie的优化：减小cookie的大小或者在静态资源上禁用cookie，设置合理的cookie的过期时间
-  9. 利用浏览器的缓存机制，给资源设置cache-control和expires，或者是通过etag来标识资源，比较是否被修改过
+  2. 优化图片：采用sprites设计风格，把多张图标合成一个图片文件，只需要发送一次请求
+  3. 采用base64对图片进行编码，将较小的图片嵌入到样式表中，可以缓存到本地减少请求的大小和次数
+  4. 将图片裁剪至合适的大小，而不是直接在页面上进行大小的压缩
+  5. 选择正确的图片格式，能用WebP的尽量用WebP，因为图像数据压缩算法好，小图用png，图标用svg，在乎图片质量的用jpeg
+  6. 避免空的src或者href，虽然不会影响加载时间，但任然会给服务器发送请求，增加服务器压力
+  7. 因为dns请求会占据请求中很大一部分的事件，因此对于页面上的其他外链资源可以给其设置dns-prefetch进行dns预解析
+  8. ajax异步请求，尽量使用get而不是post，因为post会发送两次请求，并且get可以利用缓存
+  9. 对于cookie的优化：减小cookie的大小或者在静态资源上禁用cookie，设置合理的cookie的过期时间
+  10. 利用浏览器的缓存机制，给资源设置cache-control和expires，或者是通过etag来标识资源，比较是否被修改过
 
 
 * 加快渲染
@@ -549,48 +553,20 @@
   当持续触发事件时，只有当一定时间内没有再继续出发事件，才会出发事件函数的执行
 
   ```javascript
-  var inpur = document.getElementById("input")
-
-    function debounce(delay) {
-        let timer
-
-        return function(value) {
-            clearTimeout(timer)
-            timer = setTimeout(() => {
-                console.log(value)
-            }, delay)
-        }
-    }
-    
-    // 变量污染？ 
-    var debounceFunc = debounce(1000)
-    input.addEventListener("keyup", function(e) {
-        debounceFunc(e.target.value)
-        // 为何这里this不丢失，下面会丢失
-        // debounceFunc(this.value)
-    })
-  ```
-  
-  ```javascript
-  var inpur = document.getElementById("input")
-        
-  function debounce(callback) {
-      let timer = null
-
-      return function() {
-          clearTimeout(timer)
-          timer = setTimeout(() => {
-          // ？如何绑上的this
-              callback.apply(this)
-          }, 2000)
+  function debounce(fn, time) {
+    let timer = null;
+    return function() {
+      const context = this;
+      const args = [...arguments];
+      if(timer) {
+        clearTimeout(timer);
+        timer = null;
       }
+      timer = setTimeout(() => {
+        fn.call(context, ...args);
+      }, time * 1000)
+    }
   }
-
-  // ？无法传入e
-  // ？如何闭包，保存timer
-  input.addEventListener("keyup", debounce(function(){
-      console.log(this.value)
-  }))
   ```
   
 * 节流函数
@@ -598,23 +574,19 @@
   当持续触发事件时，保证一段时间内，只触发一次事件
   
   ```javascript
-   var btn = document.getElementById("button")
-
-    function throttle(callback, wait) {
-        let timer = null;
-
-        return function() {
-            if (!timer) {
-                timer = setTimeout(() => {
-                    callback()
-                    // ？这里为什么不用clearTimeout
-                    timer = null
-                }, wait)
-            }
+   function throttle(fn, time) {
+      let timer = null;
+      return function() {
+        const context = this;
+        const args = [...arguments]
+        if (!timer) {
+          timer = setTimeout(() => {
+            fn.apply(context, args)
+            timer = null;
+          }, time * 1000)
         }
-    }
-
-    btn.onclick = throttle(() => console.log(1), 2000)
+      }
+   }
   ```
   
 * 图片懒加载
@@ -713,7 +685,7 @@
   
 * 减少build时间
 
-  1. thread-loader：多进程打包，使用：将其放在比较耗时的loader前，比如babel-loader
+  1. thread-loader：多线程打包，使用：将其放在比较耗时的loader前，比如babel-loader；还可以通过HappyPack将耗时长的loader放进并行的线程里
   2. cache-loader：缓存打包资源，提高二次构建的速度，使用：将其放在比较耗时的loader前
   3. HotModuleReplacementPlugin：在开发过程中开启热更新，如果有修改文件，只刷新该模块，其他保持不变
     ```javascript
@@ -737,7 +709,22 @@
       开发环境：希望减少构建时间，去除代码压缩、gzip、体积分析等优化的配置，大大提高构建速度
       生产环境：希望减小最终项目的打包体积需要代码压缩、gzip、体积分析等优化的配置，大大降低最终项目打包体积
   
+  6. 因为babel非常影响打包速度，转换的代码越多，效率越低。因此配置babel-loader时，只作用在src下的js文件上，并且要排除node_modules，同时可以将babel编译过的文件缓存起来，这样下次只需要编译更改过的代码文件：
+  ```javascripy
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader?cacheDirectory=true',
+        include: [resolve('src')],
+        exclude: /node_modules/
+      }
+    ]
+  ```
   
+  7. 使用DllPlugin来将特定的类库提前打包引入，极大减少打包类库的次数，只有当类库更新版本时才有需要重新打包，实现了公共代码抽离成单独文件的优化方案。
+
+  
+
 * 减少打包体积
     （代码的压缩比较耗时间，所以只用在打包项目时，所以只需要在webpack.prod.js中配置）
    - css-minimizer-webpack-plugin 压缩、去重css文件
@@ -757,7 +744,7 @@
       ]
    }
    ```
-   - tree-shaking：只打包用到的代码，没用到的不打包，webpack5在production模式下默认开启
+   - tree-shaking：只打包用到的代码，没用到的不打包，webpack4在production模式下默认开启
   
 * source-map
   方便在报错的时候定位到错误的文件位置
