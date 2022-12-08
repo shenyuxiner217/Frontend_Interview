@@ -55,8 +55,6 @@
   
   原型继承：JS中，A类继承B类，是通过原型实现的。extends语法事实上创建了两个[[prototype]]的引用，首先让A类通过原型链指向B类，继承了B类的所有属性，其次A类的prototype属性通过原型链指向B类的prototype，继承了B类prototype中的所有方法。
   
-
-  
   
 * call & apply & bind
   
@@ -88,8 +86,29 @@
   3. Array.isArray() // 兼容性问题
   4. Object.prototype.toString.call(a) === "[object Array]" （推荐）
   
+ 
+* typeof vs instanceof
   
+  typeof用于判断primitive类型，可以判断function类型，但是null、对象和数组都为object类型。
+  instanceof用于判断对象的类型，不能正确判断基本类型，其原理是判断在其原型链中是否有该类型的原型。
+ 
+ 
+ * || vs &&
+ 
+  均会对第一个操作数执行条件判断，先转为布尔值：
+  ||: 如果条件判断为true返回第一个操作数值，false返回第二个操作数值；即返回遇到的第一个false
+  &&: 如果条件判断为true则返回第二个操作数，false返回第二个操作数值；即返回遇到的第一个true
   
+* new操作符发生了什么
+  - 新建一个plain object
+  - 这个新对象的原型链指向该类的构造函数的prototype对象
+  - 构造函数内部的this指向新对象
+  - 执行构造函数内部代码
+  - 如果构造函数返回非空对象，则返回该对象，否则返回这个新建的对象
+  
+
+
+
 ## DOM & BOM
 
 * defer 和 aync
