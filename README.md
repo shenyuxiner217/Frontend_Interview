@@ -107,6 +107,15 @@
   - 如果构造函数返回非空对象，则返回该对象，否则返回这个新建的对象
   
 
+* utf-8是Unicode（万国码）的一种编码方式，完全兼容ASCII的128个字符
+
+* encodeURI vs encodeURIComponent
+
+  encodeURI转义整个URI，因此有些URI中特殊的符号不会转义
+  
+* fetch
+
+  - 
 
 
 ## DOM & BOM
