@@ -115,7 +115,11 @@
   
 * fetch
 
-  - 
+  - 基于Promise，是原生js而没有封装
+  - 只会对网络请求报错，400、500都是成功的请求
+  - 默认不带cookie，需要配置项 {credentials: 'include'}
+  - fetch不支持abort请求或者请求超时控制
+  - fetch不支持原生检测请求的进度，xhr可以
 
 
 ## DOM & BOM
