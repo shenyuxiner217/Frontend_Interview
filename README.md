@@ -71,6 +71,19 @@
   改变this的指向
   
   手写call：
+  ```javascript
+  Function.prototype.mycall = functon(context) {
+    const args = [...arguments].slice(1);
+    if (typeof this !== "function") {
+      throw new Error("Type Error");
+    }
+    context = context || window;
+    context.fn = this;
+    
+    return context.fn(...args)
+  }
+  
+  ```
     
   
   
@@ -121,6 +134,12 @@
   - fetch不支持abort请求或者请求超时控制
   - fetch不支持原生检测请求的进度，xhr可以
 
+
+* 判断某个对象是否属于某个类
+
+  - 用instanceof方法来判断构造函数的prototype属性是否出现在对象原型链中
+  - 用对象的constructor属性来判断，看是否指向类的构造函数，但是constructor有被改写的风险
+  - 判断是否是某个内置的引用类型，可以使用Object.prototype.toString.call()来打印对象的类型名
 
 ## DOM & BOM
 
