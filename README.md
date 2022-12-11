@@ -79,12 +79,32 @@
     }
     context = context || window;
     context.fn = this;
-    
-    return context.fn(...args)
+    const result = context.fn(...args)
+    delete context.fn;
+    // 因为要调用所以返回调用结果
+    return result;
   }
   
   ```
-    
+  
+  手写bind：
+  ```javascript
+    Function.prototype.myBind = function(context) {
+      if (typeof this !== "function") {
+        throw new Error("Type Error")
+      }
+      let args = [...arguments].slice(1);
+      context = context || window;
+      context.fn = this;
+      
+      return function Fn() {
+        args = [...args, ...arguments];
+        const result = context.fn(...args);
+        delete context.fn;
+        return result;
+      }
+    }
+  ```
   
   
 * 判断是数组还是对象
