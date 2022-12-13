@@ -613,6 +613,14 @@
   - 在 React 18 的 Suspense 组件中，官方对 空的fallback 属性的处理方式做了改变：不再跳过 缺失值 或 值为null 的 fallback 的 Suspense 边界。相反，会捕获边界并且向外层查找，如果查找不到，将会把 fallback 呈现为 null。
 
 
+* Redux vs Mobx
+
+  - redux中只有一个store，而mobx中有多个store
+  - redux使用plain object来保存状态数据，需要手动处理变化的操作，而mobx是用observable保存数据，可以自动响应数据的操作
+  - redux的状态不可改，使用纯函数返回一个新的状态，mobx中的状态可以直接修改
+  - mobx更多的抽象和封装，使用面向对象的思想，更难预测结果和调试，redux采用函数式编程思想，更容易调试
+
+
 
 ## 性能优化
 
