@@ -192,6 +192,9 @@
   - 用对象的constructor属性来判断，看是否指向类的构造函数，但是constructor有被改写的风险
   - 判断是否是某个内置的引用类型，可以使用Object.prototype.toString.call()来打印对象的类型名
 
+
+
+
 ## DOM & BOM
 
 * defer 和 aync
@@ -229,7 +232,7 @@
 
   - 语义化标签
   - video和audio标签，以及为了浏览器兼容性用于加载资源的source标签
-  - canvus画布，可以用于在网页上创建画布，用js绘图
+  - canvas画布，可以用于在网页上创建画布，用js绘图
   - 增强型表单：input新类型属性，可以更好地控制输入和验证，如date、time、email、range；新表单元素progress、meter等；新表单属性：pattern、required、min/max、mutiple
   - navigator里新增Geolocation对象可以通过getCurrentPostion()方法来获取用户位置
   - draggable拖放特性
@@ -345,6 +348,23 @@
 * 水平居中
   - margin: 0 auto;
     height: 100px;
+
+
+* CSS为什么放在页面头部，JS为什么放在页面底部
+
+  CSS不会阻塞DOM的构建，但是会阻塞渲染树的构建，因为渲染树需要CSS树的共同构建，从而阻塞布局影响关键渲染流程。如果将CSS放在底部，已经被解析完的内容会被渲染出来，CSS加载完成后会造成页面重新渲染，性能和体验都很不好。
+  JS文件在script标签不设置async和defer的情况下，会阻塞DOM的构建，如果放在头部则会在没有执行完js文件之前一直没有html内容，体验不好。
+  
+  - css加载不会阻塞DOM树的解析
+  - css加载会阻塞DOM树的渲染
+  - css加载会阻塞后面js语句的执行
+
+
+* canvas vs svg
+
+  canvas 输出的是一整幅画布，就像一张图片，放大会失真或锯齿；svg绘制出来的每一个图形的元素都是独立的DOM节点，是矢量图形，放大缩小不会失真或锯齿。
+  
+  
 
 
 ## HTTP
