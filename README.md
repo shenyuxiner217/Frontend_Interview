@@ -226,20 +226,39 @@
 
 
 
-## HTML && CSS
+## HTML
 
 * H5新特性
 
-  - 语义化标签
-  - video和audio标签，以及为了浏览器兼容性用于加载资源的source标签
-  - canvas画布，可以用于在网页上创建画布，用js绘图
-  - 增强型表单：input新类型属性，可以更好地控制输入和验证，如date、time、email、range；新表单元素progress、meter等；新表单属性：pattern、required、min/max、mutiple
-  - navigator里新增Geolocation对象可以通过getCurrentPostion()方法来获取用户位置
+  - 语义化标签：header、footer、nav、article、main、aside、section；
+  - video和audio标签，以及为了浏览器兼容性用于加载资源的source标签；
+  - canvas画布，可以用于在网页上创建画布，用js绘图；
+  - 增强型表单：input新类型属性，可以更好地控制输入和验证，如date、time、email、range；新表单元素progress、meter等；新表单属性：pattern、required、min/max、mutiple、autofocus；
+  - navigator里新增Geolocation对象可以通过getCurrentPostion()方法来获取用户位置；
   - draggable拖放特性
   - web worker：通过Worker(x.js)构造函数来创建新的后台线程，该脚本文件会运行在该线程中，通过postMessage和onMessage来交换数据
   - 新增本地存储方式：localStorage、sessionStorage
   - WebSocket实现了服务器端和客户端的全双工通信
 
+* meta标签
+
+  用来描述网页文档的属性，一般由name和content来定义一组meta标签的值。
+  - charset: 文档的编码方式；
+  - keywords: 网页的关键字；
+  - description: 网页的描述；
+  - viewport: 适配移动端，可以控制视口的大小和比例。
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+* svg vs canvas
+  - svg是一种基于xml的矢量图，放大不会导致失真，而canvas是基于像素的位图，会失真；
+  - svg本质上也是页面上的元素，支持事件处理，而canvas不支持事件处理器；
+  - svg中的文字和图像是独立的，文字可保留可搜索，canvas的文本渲染能力弱；
+  - canvas绘制的图形可以以jpg、png方式保存，svg只能以svg的格式保存；
+  - canvas渲染性能高，适合图像密集的游戏开发，而svg由于不会失真更适合做地图。
+  
+
+
+## CSS
 
 * CSS3新特性
 
