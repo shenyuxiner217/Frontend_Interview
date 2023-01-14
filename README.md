@@ -262,22 +262,53 @@
 
 * CSS3新特性
 
-  - 新增圆角：border-radius
-  - 新增元素阴影：box-shadow
-  - 文字阴影特效：text-shadow
+  - 新增圆角：border-radius，不需要有border也可以设置；
+  - 新增元素阴影：box-shadow: x-shadow y-shadow blur-radius spread-radius color inset; 前两个是必须；
+  - 文字特效：
+    text-shadow，与box-shadow相似，阴影是文字本身；
+    word-wrap: normal | break-word; 文字如何换行，break-word表示可以单词内换行；
+    text-overflow: clip ｜ ellipsis; 文字如何处理超过容器边界的显示；
   - 新增颜色表示方式：rgba和hsla，a为透明度
-  - 新增一些背景属性：backgroud-clip、border-origin
-  - 新增transition属性，过渡效果：
+  - 新增一些背景属性：
+    backgroud-clip: border-box | padding-box | content-box; 确定背景的画区，默认为border-box
+    background-origin: border-box | padding-box | content-box; 背景图片相对于什么来定位，默认为padding-box （定位是通过background-position: 10px 10px;）
+  - 新增transition属性，过渡效果：（可以用transition简写）
     transition-property: width; 
     transition-duration: 1s;
     transition-timing-function: linear;
     transition-delay: 2s;
     
-  - 新增transform属性，允许旋转、缩放、平移元素
-  - 新增animation动画属性、做预设动画
-  - 新增颜色渐变linear-gradient(direction, color-stop1, color-stop2,...)
-  - 新增flex布局和grid布局
+  - 新增transform属性，允许旋转、缩放、平移元素：
+    transform: translate(120px, 50%)：位移
+    transform: scale(2, 0.5)：缩放
+    transform: rotate(0.5turn)：旋转
+    transform: skew(30deg, 20deg)：倾斜
+    
+  - 新增animation动画属性、做预设动画：
+    animation-name：动画名称
+    animation-duration：动画持续时间
+    animation-timing-function：动画时间函数
+    animation-delay：动画延迟时间
+  
+  - 新增颜色渐变linear-gradient(direction, color-stop1, color-stop2,...)，radial-gradient径向渐变；
+  - 新增flex布局和grid布局；
 
+* 选择器
+
+  100:
+  - id选择器：#id；
+  10:
+  - class选择器：.classname；
+  - 伪类选择器：:last-child  :first-of-tyle  :hover  :active；
+  - 属性选择器：a[ref="eee"]；
+  1:
+  - 标签选择器：div；
+  - 伪元素选择器：::after  ::first-letter；
+  0:
+  - 子代选择器：ul>li；
+  - 后代选择器：li a；
+  - 相邻兄弟选择器：h1+p；
+  - 通配符选择器：*；
 
 
 * 伪类与伪元素
