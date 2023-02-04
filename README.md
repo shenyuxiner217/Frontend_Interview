@@ -293,6 +293,36 @@
   - 新增颜色渐变linear-gradient(direction, color-stop1, color-stop2,...)，radial-gradient径向渐变；
   - 新增flex布局和grid布局；
 
+
+* css性能优化
+  - 将css文件进行打包压缩，减少文件体积。
+  - 减少@import来引入css文件，因为这种方式会等页面加载完成后才进行加载，而link的引入方式可以在页面加载时加载。
+  - 尽量减少后代选择器，因为选择器的匹配方式是从右往左，会先遍历所有自元素来寻找后代元素，尽量减少选择器的深度，避免使用后代选择器。
+  - 避免使用通配选择器，因为会对所有元素进行便利。
+  - 尽量避免使用无关的选择器规则，比如有id的时候则不要为规则增加标签。
+  - 尽量减少页面的重排、重绘。
+  - 标准化各种浏览器的前缀：带浏览器前缀的在前。标准属性在后。
+  - 使用css雪碧图，同一页面相近部分的小图标，减少资源请求。
+  - 将具有相同属性的样式抽离出来，整合并通过class在页面中使用，提高css可维护性。
+ 
+ 
+* 媒体查询
+  允许内容的呈现针对⼀个特定范围的输出设备⽽进⾏裁剪，⽽不必改变内容本身，适合web⽹⻚应对不同型号的设备⽽做出对应的响应适配。
+  
+  ```
+    <!-- link元素中的CSS媒体查询 --> 
+    <link rel="stylesheet" media="(max-width: 800px)" href="example.css" /> 
+    <!-- 样式表中的CSS媒体查询 --> 
+    <style> 
+    @media (max-width: 600px) { 
+      .facet_sidebar { 
+        display: none; 
+      } 
+    }
+    </style>
+  ```
+
+
 * 选择器
 
   100:
@@ -312,13 +342,21 @@
 
 
 * 伪类与伪元素
-  
-  伪类：实际不存在的类，我们希望不通过静态的标记元素，而是动态的选中某些状态下的某些元素。以单个冒号开头。
-  伪元素：实际不存在的元素，表示页面上的某些位置的元素。以两个冒号开头。
+  伪类：实际不存在的类，我们希望不通过静态的标记元素，而是动态的选中某些状态下的某些元素。以单个冒号开头。(:first-child, :nth-child(n), :hover, :visited)
+  伪元素：实际不存在的元素，表示页面上的某些位置的元素。以两个冒号开头。(::after, ::before, ::first-line)
 
-* rem 移动端适配
-  将html根元素字体大小设置为屏幕宽度，即1rem
-  
+
+* em & rem
+  em: 子元素字体大小的em是相对于父元素字体大小
+      元素的 width/height/padding/margin 用em的话是相对于该元素的font-size
+  rem 移动端适配
+  将 html 根元素字体大小设置为屏幕宽度，即1rem
+ 
+* line-height:
+  指一行文本的高度，如果一个标签没有定义height，则height默认由line-height决定。
+  把line-height设置为height一样的大小，则可以实现单行文字的垂直居中。
+ 
+ 
 * BFC 块级格式化上下文 (Block Formatting Context)
 
   一个环境中的元素不会影响到其它环境中的布局，BFC就是一个作用范围，把它理解成是一个独立的容器，并且这个容器里box的布局与这个容器外的box毫不相干。
@@ -345,20 +383,33 @@
   
 
 
-
 * 清除浮动
 
   - 给父元素设置高度
-  - 父元素设置overflow: hidden/auto
+  - 父元素设置overflow: hidden/auto（利用BFC）
   - 使用伪元素
     ::after{
       content: "";
-      display: table; 
+      display: table/block; 
       clear: both;
     }
   - 在最后一个浮动元素后面加一个空的元素，并设置clear:both
  
 
+* DOM 样式
+  window.innerHeight 是浏览器页面可视区高度
+  window.outerHeight 是整个浏览器的高度
+  
+  element.clientHeight 是元素可视范围的高度(包括内容+padding)
+  element.offsetHeight 是元素可视范围高度+边框
+  
+  element.offsetLeft 当前元素相对于其定位父元素的水平偏移量
+  element.offsetTop 当前元素相对于其定位父元素的水平偏移量
+  
+  element.scrollHeight 当前元素内滚动区域的高度
+  element.scrollTop 当前元素内垂直滚动区域滚动的距离
+  
+  当满足scrollTop + clientHeight >= offsetTop时，说明元素滚动到视口内
 
 
 * CSS预处理器的优点：
@@ -384,6 +435,7 @@
         top: 50%;
         transform: translate(-50%,-50%);
     }
+    
   - flex布局
     .parent {
       display: flex;
